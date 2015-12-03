@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<!-- 12.16.14 - NE - Began as GuilSpillMapper resource file. -->
+<!-- 02.23.12 - NE - Created. -->
+<!--
+*************************
+ ENGLISH RESOURCES
+************************* 
+ -->
+<resources>
+  <!-- Settings -->
+  
+  <!--  URLs -->
+  <resourceBundle name="urls">
+	<!-- wim urls -->
+	<resource name="landConserveUrl" value="http://107.20.228.18/ArcGIS/rest/services/FWSResourceMapper/LCC_wm/MapServer"/>
+  	<resource name="coastWetUrl" value="http://107.20.228.18/ArcGIS/rest/services/FWSResourceMapper/coastal_wetlands_wm/MapServer"/>
+  	<resource name="wetlandsUrl" value="http://107.20.228.18/ArcGIS/rest/services/Wetlands/MapServer"/>
+  	<resource name="protAreasUrl" value="http://107.20.228.18/ArcGIS/rest/services/FWSResourceMapper/Protected_Areas_wm/MapServer"/>
+  	<resource name="birdAreasUrl" value="http://107.20.228.18/ArcGIS/rest/services/FWSResourceMapper/important_bird_areas/MapServer"/>
+  	<resource name="cbrsUrl" value="http://107.20.228.18/ArcGIS/rest/services/FWSResourceMapper/cbrs_wm/MapServer"/>
+  	<resource name="critHabUrl" value="http://107.20.228.18/ArcGIS/rest/services/FWSResourceMapper/FWS_Critical_Habitat/MapServer"/>
+  	<resource name="hurricaneUrl" value="http://107.20.228.18/ArcGIS/rest/services/FWSResourceMapper/Hurricanes/MapServer"/>
+  	<resource name="scatUrl" value="http://107.20.228.18/ArcGIS/rest/services/FWSResourceMapper/SCAT/MapServer"/>
+  	
+  	<resource name="proxyUrl" value="http://107.20.228.18/serviceProxy/proxy.ashx" />
+	
+	<!-- other urls -->  
+  	<resource name="spillPlumeUrl" value="http://events.arcgisonline.com/ArcGIS/rest/services/Gulf_Coast_Oil_Spill_Plume/MapServer"/>
+  
+  </resourceBundle>
+  
+  <!-- UI graphics -->
+  <resourceBundle name="ui.graphics">
+    <resource name="headerLogo" value="assets/images/usgsLogoSm.jpg" />
+    <resource name="wimLogo" value="assets/images/wim_logo_sm_4c.gif" />    
+  </resourceBundle>
+  
+  <!-- UI text -->
+  <resourceBundle name="ui.text">
+  	<!--  Application Titles -->
+    <resource name="mainTitle" value="Template Mapper"/>
+    <resource name="subTitle" value="Beta Version"/>
+    <!-- Component Text -->
+    <resource name="geocodeSearchButtonText" value="Find Location"/>
+    <resource name="geocodeSearchHintText" value="Type Address, Landmark, etc..." />
+  </resourceBundle>
+</resources>

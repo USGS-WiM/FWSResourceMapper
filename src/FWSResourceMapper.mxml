@@ -1,0 +1,507 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 05.15.12 - NE - Fixed issue with background alpha on layer list. Removed PDF declarations. Updated more info links for some layers. -->
+<!-- 05.15.12 - NE - Updated to use services on fws32. -->
+<!-- 05.14.12 - NE - Updated to use current apis and libs. Updated to use service on epa13. -->
+<!-- 06.22.10 - NE - Updated identify for Protected Areas to include Website attribute. -->
+<!-- 06.18.10 - NE - Updated SCAT service to automatically populate date on entry in layer list. -->
+<!-- 06.18.10 - NE - Changed initial extent.  Added SCAT data to mapper and identify results. -->
+<!-- 06.16.10 - NE - Added functionality to query multiple layers in one identify and show results for all layers. -->
+<!-- 06.16.10 - NE - Adjustments to layer legend area. -->
+<!-- 06.15.10 - NE - Added NOAA Oil Spill Plume. -->
+<!-- 05.25.10 - NE - Added globally important bird areas to layer list. -->
+<!-- 05.25.10 - NE - Updated to info linked for the Protected Areas Layer.  Added box that comes up on click with several links available. Several texts tweaks and fix to Protected Areas Query -->
+<!-- 05.20.10 - NE - Removed NOAA Oil Spill Plume. -->
+<!-- 05.19.10 - NE - Added new layers for critical habitat and hurricanes since 1990 -->
+<!-- 05.14.10 - NE - Updated cursor for map to arrow.  Added Disclaimer.  Adjust wetlands checkbox functionality. -->
+<!-- 05.13.10 - NE - Added info links for each layer in the layer list. Removed WiM Logo -->
+<!-- 05.13.10 - NE - Added new layers.  Fixed bug with max/min available layers box. -->
+<!-- 05.12.10 - NE - Added functionality to max/min available layers box -->
+<!-- 05.12.10 - NE - Added infoWindow for click on Protected Areas. -->
+<!-- 05.12.10 - NE - Added new layers.  Added Graphic for incident site.  Added Legends for all layers. -->
+<!-- 05.12.10 - NE - Changed logo in header and map title. Added opacity sliders and functionality.  Limited levels of detail. -->
+<!-- 05.11.10 - NE - Layout adjustments.  Addition of NOAA spill plume map service. -->
+<!-- 05.11.10 - NE - Initial set up. -->
+<mx:Application
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:esri="http://www.esri.com/2008/ags"
+    xmlns:wim="gov.usgs.wim.controls.*"
+    pageTitle="Fish and Wildlife Resource Areas of the Gulf of Mexico" horizontalScrollPolicy="off" verticalScrollPolicy="off"
+    layout="absolute" xmlns:navigationClasses="com.esri.ags.controls.navigationClasses.*">
+    
+    <mx:Style source="assets/styles/main.css"/>
+    <mx:Script source="FWSResourceMapper.as" />
+    
+		<esri:NavigationTool id="navToolbar" map="{map}"/>	
+	
+		<esri:SimpleFillSymbol id="protAreasQuerySym" style="null" color="0x000000">
+	    	<esri:outline>
+	    		<esri:SimpleLineSymbol style="solid" color="0xFFFF00" width="2" />
+	    	</esri:outline>
+	    </esri:SimpleFillSymbol>
+	    
+	    <esri:SimpleFillSymbol id="critHabQuerySym" style="null" color="0x000000">
+	    	<esri:outline>
+	    		<esri:SimpleLineSymbol style="solid" color="0xFF00FF" width="2" />
+	    	</esri:outline>
+	    </esri:SimpleFillSymbol>
+	    
+	    <esri:SimpleLineSymbol id="hurricaneQuerySym" style="solid" color="0x00FFFF" width="2" />
+	    
+	    <esri:SimpleLineSymbol id="scatQuerySym" style="solid" color="0xFFA500" width="2" />
+	    
+	    <esri:PictureMarkerSymbol id="dwhiSym" source="assets/images/DWHI_symbol.png" />
+	    
+	    <esri:QueryTask id="protAreasTask" useAMF="false" proxyURL="{resourceManager.getString('urls', 'proxyUrl')}"
+			url="{resourceManager.getString('urls', 'protAreasUrl')}/1" showBusyCursor="true" />
+		<esri:Query id="protAreasQuery" returnGeometry="true">
+			<esri:outFields>
+				<mx:String>Parcel_Nam</mx:String>
+				<mx:String>Class_Desc</mx:String>
+				<mx:String>Website</mx:String>
+			</esri:outFields>
+		</esri:Query>
+		
+		<esri:QueryTask id="critHabTask" proxyURL="{resourceManager.getString('urls', 'proxyUrl')}"
+			url="{resourceManager.getString('urls', 'critHabUrl')}/0" showBusyCursor="true" />
+		<esri:Query id="critHabQuery" returnGeometry="true">
+			<esri:outFields>
+				<mx:String>COMNAME</mx:String>
+			</esri:outFields>
+		</esri:Query>
+		
+		<esri:IdentifyTask id="hurricaneTask"            
+			concurrency="last"        
+			showBusyCursor="true" proxyURL="{resourceManager.getString('urls', 'proxyUrl')}"
+			url="{resourceManager.getString('urls', 'hurricaneUrl')}"/>
+			
+		<esri:IdentifyTask id="scatTask"            
+			concurrency="last"        
+			showBusyCursor="true" proxyURL="{resourceManager.getString('urls', 'proxyUrl')}"  
+			url="{resourceManager.getString('urls', 'scatUrl')}"/>
+		
+		
+		<!-- Info Box Symbol for displaying layer query results -->
+	    	   	
+		<esri:InfoSymbol id="singleGraphicSym" containerStyleName="wetInfo" >
+	   		<esri:infoRenderer>
+	   			<mx:Component>
+	   				<mx:VBox styleName="infoBox" width="100%" >		   				
+		   				<mx:Style source="assets/styles/infoSymbolBox.css"/>
+	   					<mx:Script>
+	   						<![CDATA[
+	   							import mx.controls.Alert;
+    							
+    							private function infoClear():void
+	   							{
+	   								parent.parent.visible = false;
+	   							}
+	   							
+	   						]]>
+	   					</mx:Script>
+	   					<mx:HBox width="100%">
+		   					<mx:Label text="Identify Results" color="white" fontWeight="bold" fontSize="12" />
+	   						<mx:HBox width="100%" horizontalGap="0" />
+				   			<mx:Button id="closeButton" styleName="InfoCloseButton" height="18" width="18" click="infoClear()"/>
+			   			</mx:HBox>
+			   			<mx:VBox styleName="poiContain" borderColor="0xFFFF00" visible="{(data.Parcel_Nam != null) ? true : false}" includeInLayout="{(data.Parcel_Nam != null) ? true : false}" width="100%" paddingTop="10" paddingBottom="5" paddingLeft="5" paddingRight="5" verticalGap="0">
+			   				<mx:VBox horizontalAlign="center" width="100%">
+			   					<mx:Label text="Protected Areas" fontWeight="bold" />
+			   				</mx:VBox>
+				   			<mx:HBox horizontalGap="0">
+			   					<mx:Text text="Parcel Name: " fontWeight="bold" />
+				   				<mx:Text text="{data.Parcel_Nam}" />
+			   				</mx:HBox>
+			   				<mx:HBox horizontalGap="0">
+				   				<mx:Text text="Class Description: " fontWeight="bold" />
+				   				<mx:Text text="{data.Class_Desc}" />
+			   				</mx:HBox>
+			   				<mx:HBox horizontalGap="0">
+				   				<mx:Text text="Website: " fontWeight="bold" />
+				   				<mx:Text text="{(data.Website != null) ? 'click here' : 'None'}" styleName="{(data.Website != null) ? 'line' : 'noline'}" useHandCursor="true" buttonMode="true" mouseChildren="false" click="(data.Website != null) ? navigateToURL(new URLRequest(data.Website)) : ''" />
+			   				</mx:HBox>
+			   			</mx:VBox>
+			   			<mx:VBox styleName="poiContain" borderColor="0xFF00FF" visible="{(data.COMNAME != null) ? true : false}" includeInLayout="{(data.COMNAME != null) ? true : false}" width="100%" paddingTop="10" paddingBottom="5" paddingLeft="5" paddingRight="5" verticalGap="0">
+			   				<mx:VBox horizontalAlign="center" width="100%">
+			   					<mx:Label text="Critical Habitat" fontWeight="bold" />
+			   				</mx:VBox>
+				   			<mx:HBox horizontalGap="0">
+				   				<mx:Text text="Common Name: " fontWeight="bold" />
+				   				<mx:Text text="{data.COMNAME}" />
+			   				</mx:HBox>
+			   			</mx:VBox>
+			   			<mx:VBox styleName="poiContain" borderColor="0x00FFFF" visible="{(data.NAME != null) ? true : false}" includeInLayout="{(data.NAME != null) ? true : false}" width="100%" paddingTop="10" paddingBottom="5" paddingLeft="5" paddingRight="5" verticalGap="0">
+			   				<mx:VBox horizontalAlign="center" width="100%">
+			   					<mx:Label text="Hurricanes since 1990" fontWeight="bold" />
+			   				</mx:VBox>
+				   			<mx:HBox horizontalGap="0">
+				   				<mx:Text text="Hurricane Name: " fontWeight="bold" />
+				   				<mx:Text text="{data.NAME}" />
+			   				</mx:HBox>
+			   			</mx:VBox>
+			   			<mx:VBox styleName="poiContain" borderColor="0xFFA500" visible="{(data.Oiling_Category != null) ? true : false}" includeInLayout="{(data.Oiling_Category != null) ? true : false}" width="100%" paddingTop="10" paddingBottom="5" paddingLeft="5" paddingRight="5" verticalGap="0">
+			   				<mx:VBox horizontalAlign="center" width="100%">
+			   					<mx:Label text="Shoreline Cleanup Assessment Technique (SCAT)" fontWeight="bold" />
+			   				</mx:VBox>
+				   			<mx:HBox horizontalGap="0">
+				   				<mx:Text text="Oiling Category: " fontWeight="bold" />
+				   				<mx:Text text="{data.Oiling_Category}" />
+			   				</mx:HBox>
+			   				<mx:HBox horizontalGap="0">
+				   				<mx:Text text="Survey Date: " fontWeight="bold" />
+				   				<mx:Text text="{data.Survey_Date}" />
+			   				</mx:HBox>
+			   			</mx:VBox>
+			   		</mx:VBox>
+				</mx:Component>
+	   		</esri:infoRenderer>
+		</esri:InfoSymbol>
+
+		<!-- End Info Box Symbol -->
+
+	    	
+    <esri:VEGeocoder id="veGeocoder" 
+					 key="Aji8Re-EmYI1VdpMOe3roa64pwmu5phdNqclyk7QfJJ6RwZTZJqiCM8Mx13aIC8_"         
+					 culture="en-US"/>
+	
+	
+	<!-- Main Map -->
+	
+    <esri:Map id="map" styleName="mapStyle" load="load()" openHandCursorVisible="false" mouseMove="mouseMove(event)" logoVisible="false" navigationClass="gov.usgs.wim.controls.WiMNavigation" extentChange="onExtentChange(event)" mapClick="onMapClick(event)">
+    	<!--<esri:lods>            
+	    	<esri:LOD resolution="0.010986328125" scale="4617149.97766929"/>       
+    	</esri:lods>-->
+    	<esri:extent>            
+			<esri:Extent id="init" xmin="-10312883.85623683" ymin="3143702.0993153406" xmax="-9138811.101776581" ymax="3605993.2463840637">                
+				<esri:SpatialReference wkid="102113"/>            
+			</esri:Extent>        
+		</esri:extent>	
+		<esri:ArcGISTiledMapServiceLayer            
+	    	visible="{mapType.selectedIndex == 0}"            
+	    	show="baseSwitch(event)"            
+	    	url="http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer" />
+	    <esri:ArcGISTiledMapServiceLayer            
+	    	visible="{mapType.selectedIndex == 1 || mapType.selectedIndex == 2}"            
+	    	show="baseSwitch(event)"            
+	    	url="http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer" />
+	    <esri:ArcGISTiledMapServiceLayer            
+	    	visible="{mapType.selectedIndex == 2}"            
+	    	show="baseSwitch(event)"            
+	    	url="http://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer" />
+    	<esri:ArcGISTiledMapServiceLayer            
+	    	visible="{mapType.selectedIndex == 3}"            
+	    	show="baseSwitch(event)"            
+	    	url="http://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer" />
+	    <esri:ArcGISDynamicMapServiceLayer
+   			id="landConserve"
+   			visible="{landConserveCB.selected}"
+   			alpha="0.65"
+			proxyURL="{resourceManager.getString('urls', 'proxyUrl')}"
+   			url="{resourceManager.getString('urls', 'landConserveUrl')}" />
+   		<esri:ArcGISDynamicMapServiceLayer
+   			id="coastWet"
+   			visible="{coastWetCB.selected}"
+   			alpha="0.65"
+			proxyURL="{resourceManager.getString('urls', 'proxyUrl')}"
+			url="{resourceManager.getString('urls', 'coastWetUrl')}" />
+	    <esri:ArcGISDynamicMapServiceLayer
+   			id="wetlands"
+   			visible="{wetlandsCB.selected}"
+   			alpha="0.65"
+			proxyURL="{resourceManager.getString('urls', 'proxyUrl')}"
+			url="{resourceManager.getString('urls', 'wetlandsUrl')}" />
+   		<esri:ArcGISDynamicMapServiceLayer
+   			id="protAreas"
+   			visible="{protAreasCB.selected}"
+   			alpha="0.65"
+			proxyURL="{resourceManager.getString('urls', 'proxyUrl')}"
+			url="{resourceManager.getString('urls', 'protAreasUrl')}" />
+   		<esri:ArcGISDynamicMapServiceLayer
+   			id="birdAreas"
+   			visible="{birdAreasCB.selected}"
+   			alpha="0.65"
+			proxyURL="{resourceManager.getString('urls', 'proxyUrl')}"
+			url="{resourceManager.getString('urls', 'birdAreasUrl')}" />
+   		<esri:ArcGISDynamicMapServiceLayer
+   			id="cbrs"
+   			visible="{coastBarrierCB.selected}"
+   			alpha="0.65"
+			proxyURL="{resourceManager.getString('urls', 'proxyUrl')}"
+			url="{resourceManager.getString('urls', 'cbrsUrl')}" />
+   		<esri:ArcGISDynamicMapServiceLayer
+   			id="spillPlume"
+   			visible="{spillPlumeCB.selected}"
+   			alpha="0.65"
+			url="{resourceManager.getString('urls', 'spillPlumeUrl')}" />
+   		
+   		<esri:ArcGISDynamicMapServiceLayer
+   			id="critHab"
+   			visible="{critHabCB.selected}"
+   			alpha="0.65"
+			proxyURL="{resourceManager.getString('urls', 'proxyUrl')}"
+			url="{resourceManager.getString('urls', 'critHabUrl')}" />
+   		<esri:ArcGISDynamicMapServiceLayer
+   			id="hurricane"
+   			visible="{hurricaneCB.selected}"
+   			alpha="0.65"
+			proxyURL="{resourceManager.getString('urls', 'proxyUrl')}"
+			url="{resourceManager.getString('urls', 'hurricaneUrl')}" />
+   		<esri:ArcGISDynamicMapServiceLayer
+   			id="scat"
+   			visible="{scatCB.selected}"
+   			alpha="1.0"
+			proxyURL="{resourceManager.getString('urls', 'proxyUrl')}"
+			url="{resourceManager.getString('urls', 'scatUrl')}" />
+   		<esri:ArcGISDynamicMapServiceLayer
+   			id="spillPlumeLayer"
+   			visible="false"
+   			url="{resourceManager.getString('urls', 'spillPlumeUrl')}/0" />
+   		<esri:GraphicsLayer id="DWHILayer" />
+   		<esri:GraphicsLayer id="queryGraphicsLayer" />
+  		<esri:GraphicsLayer id="infoGraphicsLayer" />
+  	</esri:Map>
+  	
+  	<mx:Box id="mapMask" visible="true" backgroundColor="gray" width="100%" height="100%" />
+  	
+  	<!-- End Main Map -->
+  	
+  	
+  	<!-- Header --> 
+  	
+  	<mx:Canvas>
+	   	<mx:HBox id="header" color="white" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" backgroundColor="black" borderStyle="solid" borderColor="black" cornerRadius="5" top="5" left="5">
+	    	<mx:Image id="headerLogo" source="./assets/images/fwsLogo.png" top="10" left="10" height="80" useHandCursor="true" buttonMode="true" mouseChildren="false" toolTip="FWS" click="navigateToURL(new URLRequest('http://www.fws.gov'))" />
+    		<mx:VBox backgroundColor="black" width="100%" height="74" paddingLeft="10" paddingRight="20" verticalGap="0" >
+				<mx:Text text="Fish and Wildlife Resource Areas of the Gulf of Mexico" width="375" color="white" paddingTop="10" fontFamily="Arial, Helvetica, sans-serif" fontWeight="bold" fontSize="22"/>
+			</mx:VBox>
+    	</mx:HBox>
+	</mx:Canvas>
+	
+	<!-- End Header --> 
+	
+	
+	<!-- Controls -->
+	<wim:ExtentNavigator targetMap="{map}" alpha="{genAlpha}" targetNavigation="{navToolbar}" id="navigation" styleName="controlBox" left="10" top="105" />
+
+	<mx:HBox id="baseLayers" alpha="{genAlpha}" styleName="controlBox" top="5" right="5">
+    	<mx:ToggleButtonBar id="mapType" horizontalGap="0" selectedIndex="2" alpha="1.0" themeColor="0x0000FF" color="white">        
+	   		<mx:dataProvider>
+	   			<mx:Array>    
+		   			<mx:String>Streets</mx:String>                
+		   			<mx:String>Imagery</mx:String>                
+		   			<mx:String>Imagery/Labels</mx:String>
+		   			<mx:String>Topo</mx:String>
+	   			</mx:Array>        
+	   		</mx:dataProvider>    
+	   	</mx:ToggleButtonBar>
+    </mx:HBox>
+    
+    <!-- End Controls -->
+	
+	
+    <mx:HBox id="geocoder" alpha="{genAlpha}" styleName="controlBox" top="45" right="5">
+    	<mx:TextInput id="geoCodeVal" width="207" color="0x000000" enter="geoCode()"/>
+    	<mx:Button label="Find Location" color="white" click="geoCode()"/>
+	</mx:HBox>
+	
+	<!-- Custom legend/layer toggling -->
+	
+	<mx:VBox id="operationLayers" backgroundAlpha="{genAlpha}" verticalScrollPolicy="off" styleName="controlBox" paddingBottom="10" top="85" right="5">
+    	<mx:HBox width="100%">
+    		<mx:Label id="legendTitle" text="Available Layers" fontSize="20" fontWeight="bold"/>
+    		<mx:Box width="100%" />
+    		<mx:VBox>
+    			<mx:HBox width="100%">
+    				<mx:Box width="100%"/>
+    				<mx:Image id="maxMinImg" height="15" width="17" source="assets/images/minus.png" useHandCursor="true" buttonMode="true" mouseChildren="false" toolTip="minimize" click="maxMin()" />
+	    		</mx:HBox>
+    		</mx:VBox>
+    	</mx:HBox>
+    	<mx:VBox id="layerList" color="white" backgroundColor="0x000000" backgroundAlpha="{genAlpha}" height="299" horizontalScrollPolicy="off" borderStyle="solid" cornerRadius="5" paddingBottom="10" paddingLeft="5" paddingRight="5" paddingTop="5" top="295" right="5">
+		    <mx:HBox paddingLeft="10" paddingRight="10" >
+		    	<mx:VBox width="100%" >
+		    		<mx:HBox width="100%" >
+	    				<mx:Box height="18" paddingTop="3" >
+	    					<mx:Button id="critHabOpacButton" mouseOver="{transLayer='critHab'; sliderFadeIn(event);}" styleName="InfoExpandButton" height="12" width="12" />
+			   			</mx:Box>
+	    				<mx:CheckBox id="critHabCB" selected="false" change="toggleLayers(event)" />
+	    				<mx:Text text="Critical Habitat" fontWeight="bold"/>
+	    				<mx:Box borderStyle="solid" useHandCursor="true" buttonMode="true" mouseChildren="false" toolTip="More Info" click="navigateToURL(new URLRequest('http://criticalhabitat.fws.gov/'))" borderColor="0x444444" borderThickness="1" backgroundColor="0xCCCCCC" paddingBottom="-3" paddingLeft="1" paddingRight="-1" paddingTop="-2">
+	    					<mx:Text text="?" color="blue" fontWeight="bold" />
+	    				</mx:Box>
+	    			</mx:HBox>	
+	    			<mx:HBox width="100%" >
+	    				<mx:Box height="18" paddingTop="3" >
+	    					<mx:Button id="protAreasOpacButton" mouseOver="{transLayer='protAreas'; sliderFadeIn(event);}" styleName="InfoExpandButton" height="12" width="12" />
+			   			</mx:Box>
+	    				<mx:CheckBox id="protAreasCB" selected="true" change="toggleLayers(event)" />
+	    				<mx:Text text="Protected Areas" fontWeight="bold"/>
+	    				<mx:Box borderStyle="solid" useHandCursor="true" buttonMode="true" mouseChildren="false" toolTip="Protected areas within 1 mile of coastline. Data from the U.S. Fish and Wildlife Service's National Wildlife Refuge System database, the Protected Areas Database of the United States (USGS National Gap Analysis Program) and the Coastal and Aquatic Managed Areas of Florida (Florida Department of Environmental Protection - CAMA)." click="protectedAreaLinksShow(event);" borderColor="0x444444" borderThickness="1" backgroundColor="0xCCCCCC" paddingBottom="-3" paddingLeft="1" paddingRight="-1" paddingTop="-2">
+	    					<mx:Text text="?" color="blue" fontWeight="bold" />
+	    				</mx:Box>
+	    			</mx:HBox>	
+	    			<mx:HBox width="100%" >
+	    				<mx:Box height="18" paddingTop="3" >
+	    					<mx:Button id="birdAreasOpacButton" mouseOver="{transLayer='birdAreas'; sliderFadeIn(event);}" styleName="InfoExpandButton" height="12" width="12" />
+			   			</mx:Box>
+	    				<mx:CheckBox id="birdAreasCB" selected="false" change="toggleLayers(event)" />
+	    				<mx:Text text="Globally Important Bird Areas" fontWeight="bold"/>
+	    				<mx:Box borderStyle="solid" useHandCursor="true" buttonMode="true" mouseChildren="false" toolTip="more info" click="navigateToURL(new URLRequest('http://www.abcbirds.org/abcprograms/domestic/iba/index.html'))" borderColor="0x444444" borderThickness="1" backgroundColor="0xCCCCCC" paddingBottom="-3" paddingLeft="1" paddingRight="-1" paddingTop="-2">
+	    					<mx:Text text="?" color="blue" fontWeight="bold" />
+	    				</mx:Box>
+	    			</mx:HBox>	
+	    			<mx:HBox width="100%" >
+	    				<mx:Box height="18" paddingTop="3" >
+	    					<mx:Button id="coastBarrierOpacButton" mouseOver="{transLayer='cbrs'; sliderFadeIn(event);}" styleName="InfoExpandButton" height="12" width="12" />
+			   			</mx:Box>
+	    				<mx:CheckBox id="coastBarrierCB" selected="true" change="toggleLayers(event)" />
+	    				<mx:Text text="Coastal Barrier Resources System Areas" width="148" fontWeight="bold"/>
+	    				<mx:Box borderStyle="solid" useHandCursor="true" buttonMode="true" mouseChildren="false" toolTip="more info" click="navigateToURL(new URLRequest('http://www.fws.gov/CBRA/'))" borderColor="0x444444" borderThickness="1" backgroundColor="0xCCCCCC" paddingBottom="-3" paddingLeft="1" paddingRight="-1" paddingTop="-2">
+	    					<mx:Text text="?" color="blue" fontWeight="bold" />
+	    				</mx:Box>
+	    			</mx:HBox>
+	    			<mx:HBox width="100%" >
+	    				<mx:Box height="18" paddingTop="3" >
+	    					<mx:Button id="wetlandsOpacButton" mouseOver="{transLayer='wetlands'; sliderFadeIn(event);}" styleName="InfoExpandButton" height="12" width="12" />
+			   			</mx:Box>
+	    				<mx:CheckBox id="wetlandsCB" enabled="{(map.level > 4) ? true : false}" selected="false" change="toggleLayers(event)" />
+	    				<mx:Text text="Wetlands" fontWeight="bold"/>
+	    				<mx:Box borderStyle="solid" useHandCursor="true" buttonMode="true" mouseChildren="false" toolTip="more info" click="navigateToURL(new URLRequest('http://www.fws.gov/wetlands/index.html'))" borderColor="0x444444" borderThickness="1" backgroundColor="0xCCCCCC" paddingBottom="-3" paddingLeft="1" paddingRight="-1" paddingTop="-2">
+	    					<mx:Text text="?" color="blue" fontWeight="bold" />
+	    				</mx:Box>
+	    			</mx:HBox> 
+	    			<mx:HBox width="100%" >
+	    				<mx:Box height="18" paddingTop="3" >
+	    					<mx:Button id="coastWetOpacButton" mouseOver="{transLayer='coastWet'; sliderFadeIn(event);}" styleName="InfoExpandButton" height="12" width="12" />
+			   			</mx:Box>
+	    				<mx:CheckBox id="coastWetCB" selected="true" change="toggleLayers(event)" />
+	    				<mx:Text text="Coastal Wetlands" fontWeight="bold"/>
+	    				<mx:Box borderStyle="solid" useHandCursor="true" buttonMode="true" mouseChildren="false" toolTip="National Wetlands Inventory wetlands within one mile of the coast" borderColor="0x444444" borderThickness="1" backgroundColor="0xCCCCCC" paddingBottom="-3" paddingLeft="1" paddingRight="-1" paddingTop="-2">
+	    					<mx:Text text="?" color="blue" fontWeight="bold" />
+	    				</mx:Box>
+	    			</mx:HBox> 
+	    			<mx:HBox width="100%" >
+	    				<mx:Box height="18" paddingTop="3" >
+	    					<mx:Button id="hurricaneOpacButton" mouseOver="{transLayer='hurricane'; sliderFadeIn(event);}" styleName="InfoExpandButton" height="12" width="12" />
+			   			</mx:Box>
+	    				<mx:CheckBox id="hurricaneCB" selected="false" change="toggleLayers(event)" />
+	    				<mx:Text text="Hurricanes since 1990" fontWeight="bold"/>
+	    				<mx:Box borderStyle="solid" useHandCursor="true" buttonMode="true" mouseChildren="false" toolTip="more info" click="navigateToURL(new URLRequest('http://www.csc.noaa.gov/hurricanes/'))" borderColor="0x444444" borderThickness="1" backgroundColor="0xCCCCCC" paddingBottom="-3" paddingLeft="1" paddingRight="-1" paddingTop="-2">
+	    					<mx:Text text="?" color="blue" fontWeight="bold" />
+	    				</mx:Box>
+	    			</mx:HBox> 
+	    			<mx:HBox width="100%" >
+	    				<mx:Box height="18" paddingTop="3" >
+	    					<mx:Button id="landConserveOpacButton" mouseOver="{transLayer='landConserve'; sliderFadeIn(event);}" styleName="InfoExpandButton" height="12" width="12" />
+			   			</mx:Box>
+	    				<mx:CheckBox id="landConserveCB" selected="false" change="toggleLayers(event)" />
+	    				<mx:Text text="Landscape Conservation Cooperatives" width="145" fontWeight="bold"/>
+	    				<mx:Box borderStyle="solid" useHandCursor="true" buttonMode="true" mouseChildren="false" toolTip="more info" click="navigateToURL(new URLRequest('http://www.fws.gov/science/shc/lcc.html'))" borderColor="0x444444" borderThickness="1" backgroundColor="0xCCCCCC" paddingBottom="-3" paddingLeft="1" paddingRight="-1" paddingTop="-2">
+	    					<mx:Text text="?" color="blue" fontWeight="bold" />
+	    				</mx:Box>
+	    			</mx:HBox>		
+	    			<mx:HBox width="100%" >
+	    				<mx:Box height="18" paddingTop="3" >
+	    					<mx:Button id="scatOpacButton" mouseOver="{transLayer='scat'; sliderFadeIn(event);}" styleName="InfoExpandButton" height="12" width="12" />
+			   			</mx:Box>
+	    				<mx:CheckBox id="scatCB" selected="true" change="toggleLayers(event)" />
+	    				<mx:Text text="Shoreline Cleanup Assessment Technique (SCAT, {(scat.layerInfos[0].name != null) ? scat.layerInfos[0].name : ''})" width="180" fontWeight="bold"/>
+	    				<mx:Box borderStyle="solid" useHandCursor="true" buttonMode="true" mouseChildren="false" toolTip="more info" click="navigateToURL(new URLRequest('http://www.noaa.gov/factsheets/new%20version/scat.pdf'))" borderColor="0x444444" borderThickness="1" backgroundColor="0xCCCCCC" paddingBottom="-3" paddingLeft="1" paddingRight="-1" paddingTop="-2">
+	    					<mx:Text text="?" color="blue" fontWeight="bold" />
+	    				</mx:Box>
+	    			</mx:HBox>
+	    			<mx:HBox width="100%" >
+	    				<mx:Box height="18" paddingTop="3" >
+	    					<mx:Button id="spillOpacButton" mouseOver="{transLayer='spillPlume'; sliderFadeIn(event);}" styleName="InfoExpandButton" height="12" width="12" />
+			   			</mx:Box>
+	    				<mx:CheckBox id="spillPlumeCB" selected="true" change="toggleLayers(event)" />
+	    				<mx:Text text="Gulf Coast Oil Spill Plume" width="110" fontWeight="bold"/>
+	    				<mx:Box borderStyle="solid" useHandCursor="true" buttonMode="true" mouseChildren="false" toolTip="more info" click="navigateToURL(new URLRequest('http://events.arcgisonline.com/ArcGIS/rest/services/Gulf_Coast_Offshore_Oil_Spill_Forecast/MapServer'))" borderColor="0x444444" borderThickness="1" backgroundColor="0xCCCCCC" paddingBottom="-3" paddingLeft="1" paddingRight="-1" paddingTop="-2">
+	    					<mx:Text text="?" color="blue" fontWeight="bold" />
+	    				</mx:Box>
+	    			</mx:HBox>
+	    		</mx:VBox>
+	    	</mx:HBox>
+	    </mx:VBox>
+	    <!-- Area for Legends -->
+    	<mx:VBox id="layerExps" maxHeight="{layerExpsMaxHeight}" backgroundAlpha="{genAlpha-.2}" color="white" backgroundColor="0x000000" width="100%" horizontalScrollPolicy="off" borderStyle="solid" cornerRadius="5" 
+    		paddingBottom="10" paddingLeft="5" paddingRight="5" paddingTop="5" top="325" right="5">
+	    	<mx:VBox id="legendBox" verticalGap="0">
+	    		<wim:ShrinkingImage id="dwhiExp" source="./assets/images/DWHI.gif" visible="true" />
+	    		<wim:ShrinkingImage id="protAreasExp" source="./assets/images/Protected-areas.gif" visible="{protAreasCB.selected}" />
+	    		<wim:ShrinkingImage id="cbrsAreasExp" source="./assets/images/CBRSareas.gif" visible="{coastBarrierCB.selected}" />
+	    		<wim:ShrinkingImage id="wetlandsExp" source="./assets/images/Wetlands.gif" visible="{wetlandsCB.selected}" />
+	    		<wim:ShrinkingImage id="coastWetExp" source="./assets/images/Coastal-wetlands.gif" visible="{coastWetCB.selected}" />
+	    		<wim:ShrinkingImage id="lccExp" source="./assets/images/LCC.gif" visible="{landConserveCB.selected}" />
+	    		<mx:Box width="200" backgroundColor="white">
+	    			<wim:ShrinkingImage id="scatExp" source="./assets/images/SCAT_Legend2.png" visible="{scatCB.selected}" />
+	    		</mx:Box>
+	    		<wim:ShrinkingImage id="plumeExp" source="./assets/images/noaa_plume.png" visible="{spillPlumeCB.selected}" />
+	    	</mx:VBox>
+	    </mx:VBox>
+    </mx:VBox>
+    
+    <!-- End Custom legend/layer toggling -->
+    
+    <!-- WiM Logo -->
+    <!--<mx:Box right="15" bottom="15" >
+    	<mx:Image id="wimLogo" source="assets/images/WiM_logo_sm.png" useHandCursor="true" buttonMode="true" mouseChildren="false" toolTip="Wisconsin Internet Mapping Group" click="navigateToURL(new URLRequest('http://www.usgs.gov'))" />
+    </mx:Box>-->
+    <!-- End WiM Logo -->
+    
+    <!-- help link that can be copied and used in various places on the mapper -->
+    <!--<mx:Text id="help1" text="Help" useHandCursor="true" buttonMode="true" mouseChildren="false" right="15" top="90" textDecoration="underline" horizontalCenter="right" color="0xFFFFFF" fontWeight="bold" fontSize="10" click="navigateToURL(new URLRequest(''))" />
+	-->
+	
+	<!-- Contains button to start print and download data. Need to adjust nav bar and position of print button if active -->	
+	<!--<mx:HBox id="printButton" color="white" backgroundColor="0x000000"  borderStyle="solid" cornerRadius="5" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5"  top="45" right="369">
+    	<mx:Button label="Download Data" click="navigateToURL(new URLRequest('http://www.fws.gov/wetlands/Data/DataDownload.html'))"/>
+    	<mx:Button label="Print Map" click="startPrint(event)" />
+    </mx:HBox>-->
+    
+    <!-- Custom Tooltip for showing zoom level of a particular set of features or map layer -->
+    <!--<mx:HBox id="wetlandLabel" alpha="0" visible="true" color="white" backgroundColor="black" borderColor="black" borderStyle="solid" cornerRadius="8" paddingLeft="5" paddingRight="5" top="220" left="35" >
+    	<mx:Text id="wetLabelText" alpha="0" visible="false" text="Wetlands" />
+    </mx:HBox> -->
+    
+    <mx:HBox id="coordsScale" alpha="{genAlpha}" bottom="10" width="100%" horizontalAlign="center">
+    	<mx:HBox id="scale" color="white" backgroundColor="0x000000" borderStyle="solid" borderColor="white" cornerRadius="5" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" >
+	    	<mx:Label id="scaleVal" text="Map Scale: 1:{map.scale.toFixed(0).toString()}"/>
+		</mx:HBox>
+		<mx:HBox id="coords" color="white" backgroundColor="0x000000" borderStyle="solid" borderColor="white" cornerRadius="5" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" >
+    		<mx:Label id="coordsVal" text="Lat: {mapY.toFixed(4)}, Lng: {mapX.toFixed(4)}"/>
+		</mx:HBox>
+	</mx:HBox>
+	
+	<mx:Box id="slider" color="white" alpha="{genAlpha+.2}" verticalGap="0" visible="false" backgroundColor="0x000000" borderStyle="solid" cornerRadius="5" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+		<mx:Box width="100%" horizontalAlign="center">
+			<mx:Text text="Opacity: {transSlide.value.toFixed(2)}" />
+		</mx:Box>
+		<mx:HSlider id="transSlide" value="{critHab.alpha}" minimum="0" maximum="1.0" x="500" y="500" change="transAdjust(transLayer);" liveDragging="true" />
+	</mx:Box>
+	
+	<mx:VBox id="protectedAreaLinks" alpha="{genAlpha}" visible="false" color="white" fontWeight="bold" backgroundColor="0x000000" borderStyle="solid" borderColor="black" cornerRadius="5" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" >
+		<mx:HBox width="100%">
+			<mx:Label text="Protected Areas Info" fontSize="14"/>
+			<mx:HBox width="100%" horizontalGap="0" />
+			<mx:Button id="closeButton" styleName="InfoCloseButton" height="18" width="18" click="protectedAreaLinks.visible = false"/>
+		</mx:HBox>
+		<mx:Box color="black" backgroundColor="0xFFFFFF" borderStyle="solid" borderColor="black" cornerRadius="5" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" >
+			<mx:Box horizontalAlign="center" width="100%">
+				<mx:Text color="#692301" fontWeight="bold" text="For more information use the following links" width="200"/>
+			</mx:Box>
+			<mx:HBox horizontalGap="0">
+				<mx:Text text="Refuges:" fontWeight="bold" />
+				<mx:Text styleName="line" text="click here" useHandCursor="true" buttonMode="true" mouseChildren="false" click="navigateToURL(new URLRequest('http://www.fws.gov/GIS/data/CadastralDB/index.htm')); protectedAreaLinks.visible = false;"/>
+			</mx:HBox>
+			<mx:HBox horizontalGap="0">
+				<mx:Text text="Protected Areas:" fontWeight="bold" />
+				<mx:Text styleName="line" text="click here" useHandCursor="true" buttonMode="true" mouseChildren="false" click="navigateToURL(new URLRequest('http://www.protectedlands.net/padus')); protectedAreaLinks.visible = false"/>
+			</mx:HBox>
+			<mx:HBox horizontalGap="0">
+				<mx:Text text="Florida's Aquatic Preserves:" fontWeight="bold" />
+				<mx:Text styleName="line" text="click here" useHandCursor="true" buttonMode="true" mouseChildren="false" click="navigateToURL(new URLRequest('http://www.dep.state.fl.us/coastal/programs/aquatic.htm')); protectedAreaLinks.visible = false"/>
+			</mx:HBox>
+		</mx:Box>
+	</mx:VBox>
+	
+</mx:Application>
