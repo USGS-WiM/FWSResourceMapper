@@ -12,20 +12,20 @@
   <!--  URLs -->
   <resourceBundle name="urls">
 	<!-- wim urls -->
-	<resource name="landConserveUrl" value="http://107.20.228.18/ArcGIS/rest/services/FWSResourceMapper/LCC_wm/MapServer"/>
-  	<resource name="coastWetUrl" value="http://107.20.228.18/ArcGIS/rest/services/FWSResourceMapper/coastal_wetlands_wm/MapServer"/>
-  	<resource name="wetlandsUrl" value="http://107.20.228.18/ArcGIS/rest/services/Wetlands/MapServer"/>
-  	<resource name="protAreasUrl" value="http://107.20.228.18/ArcGIS/rest/services/FWSResourceMapper/Protected_Areas_wm/MapServer"/>
-  	<resource name="birdAreasUrl" value="http://107.20.228.18/ArcGIS/rest/services/FWSResourceMapper/important_bird_areas/MapServer"/>
-  	<resource name="cbrsUrl" value="http://107.20.228.18/ArcGIS/rest/services/FWSResourceMapper/cbrs_wm/MapServer"/>
-  	<resource name="critHabUrl" value="http://107.20.228.18/ArcGIS/rest/services/FWSResourceMapper/FWS_Critical_Habitat/MapServer"/>
-  	<resource name="hurricaneUrl" value="http://107.20.228.18/ArcGIS/rest/services/FWSResourceMapper/Hurricanes/MapServer"/>
-  	<resource name="scatUrl" value="http://107.20.228.18/ArcGIS/rest/services/FWSResourceMapper/SCAT/MapServer"/>
+	<resource name="landConserveUrl" value="https://fwspublic.wim.usgs.gov/ArcGIS/rest/services/FWSResourceMapper/LCC_wm/MapServer"/>
+  	<resource name="coastWetUrl" value="https://fwspublic.wim.usgs.gov/ArcGIS/rest/services/FWSResourceMapper/coastal_wetlands_wm/MapServer"/>
+  	<resource name="wetlandsUrl" value="https://fwspublic.wim.usgs.gov/ArcGIS/rest/services/Wetlands/MapServer"/>
+  	<resource name="protAreasUrl" value="https://fwspublic.wim.usgs.gov/ArcGIS/rest/services/FWSResourceMapper/Protected_Areas_wm/MapServer"/>
+  	<resource name="birdAreasUrl" value="https://fwspublic.wim.usgs.gov/ArcGIS/rest/services/FWSResourceMapper/important_bird_areas/MapServer"/>
+  	<resource name="cbrsUrl" value="https://fwspublic.wim.usgs.gov/ArcGIS/rest/services/FWSResourceMapper/cbrs_wm/MapServer"/>
+  	<resource name="critHabUrl" value="https://fwspublic.wim.usgs.gov/ArcGIS/rest/services/FWSResourceMapper/FWS_Critical_Habitat/MapServer"/>
+  	<resource name="hurricaneUrl" value="https://fwspublic.wim.usgs.gov/ArcGIS/rest/services/FWSResourceMapper/Hurricanes/MapServer"/>
+  	<resource name="scatUrl" value="https://fwspublic.wim.usgs.gov/ArcGIS/rest/services/FWSResourceMapper/SCAT/MapServer"/>
   	
-  	<resource name="proxyUrl" value="http://107.20.228.18/serviceProxy/proxy.ashx" />
+  	<resource name="proxyUrl" value="https://fwsmapper.wim.usgs.gov/serviceProxy/proxy.ashx" />
 	
 	<!-- other urls -->  
-  	<resource name="spillPlumeUrl" value="http://events.arcgisonline.com/ArcGIS/rest/services/Gulf_Coast_Oil_Spill_Plume/MapServer"/>
+  	<resource name="spillPlumeUrl" value="https://events.arcgisonline.com/ArcGIS/rest/services/Gulf_Coast_Oil_Spill_Plume/MapServer"/>
   
   </resourceBundle>
   
