@@ -1,0 +1,45 @@
+[
+  {
+    "name": "FWSResourceMapper",
+    "organization": "U.S. Geological Survey",
+    "description": "FWS Resource Mapper (Gulf Spill)",
+    "version": "v0.0.0",
+    "status": ["Archival"],
+
+    "permissions": {
+      "usageType": "openSource",
+      "licenses": [
+        {
+          "name": "Public Domain",
+          "URL": "https://github.com/USGS-WiM/FWSResourceMapper/blob/master/LICENSE.md"
+        }
+      ]
+    },
+
+    "homepageURL": "https://wim.usgs.gov",
+    "downloadURL": "https://github.com/USGS-WiM/FWSResourceMapper/archive/master.zip",
+    "disclaimerURL": "https://github.com/USGS-WiM/FWSResourceMapper/blob/master/DISCLAIMER.md",
+    "repositoryUrl": "https://github.com/USGS-WiM/FWSResourceMapper",
+    "vcs": "git",
+
+    "laborHours": null,
+
+    "tags": [
+      "fws",
+      "resource"
+    ],
+
+    "languages": [
+      "javascript"
+    ],
+
+    "contact": {
+      "name": "Nick Estes",
+      "email": "njestes@usgs.gov"
+    },
+
+    "date": {
+      "metadataLastUpdated": "2018-04-19"
+    }
+  }
+]
